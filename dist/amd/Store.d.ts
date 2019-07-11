@@ -3,17 +3,35 @@ export interface IStoreOptions {
     logOnChange?: boolean;
 }
 export declare class Store<T extends {
-    [key: string]: any;
+    [key: string]: any[];
 }> {
     private _options;
     private _observables;
     private _registeredActions;
     constructor(state: T, options?: IStoreOptions);
-    observable<S>(stateProperty: string): Observable<IStoreActionResult<S>>;
+    /**
+     * gets an observable for the specified store state value, if the state value is not found returns null
+     * @param statePropertyName name of the property to observe from the store state
+     */
+    observable<S>(statePropertyName: string): Observable<IStoreActionResult<S>>;
+    /**
+     * registers an action which can be executed to update store values. actions with the same name are not allowed
+     * @param action action to register with the store
+     */
     registerAction<U>(action: IStoreAction<T, U>): void;
+    /**
+     * calls the named action with the specified arguments in order of which they are supplied
+     * @param name name of the action to execute
+     * @param args any number of arguments to pass to the specified action
+     */
     executeAction<S>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
-    getOrExecuteAction<S>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
-    get<S>(propertyName: string): S;
+    /**
+     * gets the current value from the store if it exists, otherwise performs the specified action
+     * @param name name of the action to execute
+     * @param args args to pass to the action
+     */
+    getOrExecuteAction<S extends any[]>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
+    get<S extends any[]>(propertyName: string): S;
     private getCurrentState;
     private notifyObservers;
     private logContents;
@@ -35,7 +53,7 @@ export interface IStoreActionResult<T> {
     /**
      * actual element which was affected by the store action
      */
-    affectedItem?: any;
+    target?: any;
     /**
      * data source from which the store was modified
      */
@@ -44,7 +62,7 @@ export interface IStoreActionResult<T> {
 export declare enum StoreActionType {
     NONE = 0,
     RESET = 1,
-    ADDED = 2,
-    REMOVED = 3,
-    UPDATED = 4
+    ADD = 2,
+    REMOVE = 3,
+    UPDATE = 4
 }

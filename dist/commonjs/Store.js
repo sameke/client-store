@@ -28,20 +28,33 @@ class Store {
             });
         });
     }
-    observable(stateProperty) {
+    /**
+     * gets an observable for the specified store state value, if the state value is not found returns null
+     * @param statePropertyName name of the property to observe from the store state
+     */
+    observable(statePropertyName) {
         let pObs = this._observables.find((obs) => {
-            return obs.key === stateProperty;
+            return obs.key === statePropertyName;
         });
         if (pObs != null) {
             return pObs.observable;
         }
         return null;
     }
+    /**
+     * registers an action which can be executed to update store values. actions with the same name are not allowed
+     * @param action action to register with the store
+     */
     registerAction(action) {
         if (this._registeredActions.find((e) => e.name === action.name) == null) {
             this._registeredActions.push(action);
         }
     }
+    /**
+     * calls the named action with the specified arguments in order of which they are supplied
+     * @param name name of the action to execute
+     * @param args any number of arguments to pass to the specified action
+     */
     async executeAction(name, ...args) {
         let ra = this._registeredActions.find((a) => {
             return a.name === name;
@@ -68,6 +81,11 @@ class Store {
             throw new Error(`${name} not registered`);
         }
     }
+    /**
+     * gets the current value from the store if it exists, otherwise performs the specified action
+     * @param name name of the action to execute
+     * @param args args to pass to the action
+     */
     async getOrExecuteAction(name, ...args) {
         let ra = this._registeredActions.find((a) => {
             return a.name === name;
@@ -76,7 +94,7 @@ class Store {
             let property = ra.property;
             let result = this.get(property);
             if (result == null || (result instanceof Array && result.length === 0)) {
-                return await this.executeAction(name, ...args);
+                return this.executeAction(name, ...args);
             }
             else {
                 return {
@@ -122,9 +140,9 @@ var StoreActionType;
 (function (StoreActionType) {
     StoreActionType[StoreActionType["NONE"] = 0] = "NONE";
     StoreActionType[StoreActionType["RESET"] = 1] = "RESET";
-    StoreActionType[StoreActionType["ADDED"] = 2] = "ADDED";
-    StoreActionType[StoreActionType["REMOVED"] = 3] = "REMOVED";
-    StoreActionType[StoreActionType["UPDATED"] = 4] = "UPDATED";
+    StoreActionType[StoreActionType["ADD"] = 2] = "ADD";
+    StoreActionType[StoreActionType["REMOVE"] = 3] = "REMOVE";
+    StoreActionType[StoreActionType["UPDATE"] = 4] = "UPDATE";
 })(StoreActionType = exports.StoreActionType || (exports.StoreActionType = {}));
 
 //# sourceMappingURL=Store.js.map
