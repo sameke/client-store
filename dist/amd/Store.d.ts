@@ -1,14 +1,10 @@
 import { Observable } from 'rxjs';
-export interface IStoreOptions {
-    logOnChange?: boolean;
-}
 export declare class Store<T extends {
     [key: string]: any[];
 }> {
-    private _options;
     private _observables;
-    private _registeredActions;
-    constructor(state: T, options?: IStoreOptions);
+    private readonly _registeredActions;
+    constructor(state: T);
     /**
      * gets an observable for the specified store state value, if the state value is not found returns null
      * @param name name of the property to observe from the store state
@@ -24,7 +20,7 @@ export declare class Store<T extends {
      * @param name name of the action to execute
      * @param args any number of arguments to pass to the specified action
      */
-    executeAction<S>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
+    executeAction<S extends any[]>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
     /**
      * gets the current value from the store if it exists (not null and length > 1), otherwise performs the specified action
      * @param name name of the action to execute
@@ -38,7 +34,6 @@ export declare class Store<T extends {
     get<S extends any[]>(name: string): S;
     private getCurrentState;
     private notifyObservers;
-    private logContents;
 }
 export interface IStoreAction<T, S> {
     name: string;

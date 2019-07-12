@@ -6,10 +6,9 @@ define(["require", "exports", "clone", "rxjs"], function (require, exports, clon
     Object.defineProperty(exports, "__esModule", { value: true });
     clone_1 = __importDefault(clone_1);
     class Store {
-        constructor(state, options) {
+        constructor(state) {
             this._observables = [];
             this._registeredActions = [];
-            this._options = options || {};
             Object.keys(state).forEach((p) => {
                 let observable = rxjs_1.Observable.create((observer) => {
                     let obs = this._observables.find((o) => {
@@ -48,6 +47,11 @@ define(["require", "exports", "clone", "rxjs"], function (require, exports, clon
         registerAction(action) {
             if (this._registeredActions.find((e) => e.name === action.name) == null) {
                 this._registeredActions.push(action);
+                if (Store.prototype.hasOwnProperty(action.name) === false) {
+                    Store.prototype[action.name] = (...args) => {
+                        this.executeAction(action.name, ...args);
+                    };
+                }
             }
         }
         /**
@@ -70,9 +74,6 @@ define(["require", "exports", "clone", "rxjs"], function (require, exports, clon
                     if (cloned.action !== StoreActionType.NONE) {
                         pObs.value = clone_1.default(result.value);
                         this.notifyObservers(pObs.observers, cloned);
-                        if (this._options.logOnChange === true) {
-                            this.logContents();
-                        }
                     }
                     return cloned;
                 }
@@ -131,12 +132,6 @@ define(["require", "exports", "clone", "rxjs"], function (require, exports, clon
             observers.forEach((o) => {
                 o.next(value);
             });
-        }
-        logContents() {
-            for (let observable of this._observables) {
-                console.log(observable.key);
-                console.log(observable.value);
-            }
         }
     }
     exports.Store = Store;

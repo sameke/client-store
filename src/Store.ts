@@ -1,4 +1,4 @@
-import { default as clone } from 'clone';
+import clone from 'clone';
 import { Observable, Observer } from 'rxjs';
 
 export class Store<T extends { [key: string]: any[] }> {
