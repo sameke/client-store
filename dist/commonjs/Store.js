@@ -30,11 +30,11 @@ class Store {
     }
     /**
      * gets an observable for the specified store state value, if the state value is not found returns null
-     * @param statePropertyName name of the property to observe from the store state
+     * @param name name of the property to observe from the store state
      */
-    observable(statePropertyName) {
+    observable(name) {
         let pObs = this._observables.find((obs) => {
-            return obs.key === statePropertyName;
+            return obs.key === name;
         });
         if (pObs != null) {
             return pObs.observable;
@@ -82,7 +82,7 @@ class Store {
         }
     }
     /**
-     * gets the current value from the store if it exists, otherwise performs the specified action
+     * gets the current value from the store if it exists (not null and length > 1), otherwise performs the specified action
      * @param name name of the action to execute
      * @param args args to pass to the action
      */
@@ -107,10 +107,14 @@ class Store {
             throw new Error(`${name} not registered`);
         }
     }
-    get(propertyName) {
+    /**
+     * gets the current value of the given state property name from the store
+     * @param propertyName name of the value to retrieve from the store
+     */
+    get(name) {
         let found = null;
         this._observables.forEach((obs) => {
-            if (obs.key === propertyName) {
+            if (obs.key === name) {
                 found = clone_1.default(obs.value);
             }
         });

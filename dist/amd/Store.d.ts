@@ -11,9 +11,9 @@ export declare class Store<T extends {
     constructor(state: T, options?: IStoreOptions);
     /**
      * gets an observable for the specified store state value, if the state value is not found returns null
-     * @param statePropertyName name of the property to observe from the store state
+     * @param name name of the property to observe from the store state
      */
-    observable<S>(statePropertyName: string): Observable<IStoreActionResult<S>>;
+    observable<S>(name: string): Observable<IStoreActionResult<S>>;
     /**
      * registers an action which can be executed to update store values. actions with the same name are not allowed
      * @param action action to register with the store
@@ -26,12 +26,16 @@ export declare class Store<T extends {
      */
     executeAction<S>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
     /**
-     * gets the current value from the store if it exists, otherwise performs the specified action
+     * gets the current value from the store if it exists (not null and length > 1), otherwise performs the specified action
      * @param name name of the action to execute
      * @param args args to pass to the action
      */
     getOrExecuteAction<S extends any[]>(name: string, ...args: any[]): Promise<IStoreActionResult<S>>;
-    get<S extends any[]>(propertyName: string): S;
+    /**
+     * gets the current value of the given state property name from the store
+     * @param propertyName name of the value to retrieve from the store
+     */
+    get<S extends any[]>(name: string): S;
     private getCurrentState;
     private notifyObservers;
     private logContents;

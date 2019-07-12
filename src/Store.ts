@@ -2,7 +2,7 @@ import clone from 'clone';
 import { Observable, Observer } from 'rxjs';
 
 export interface IStoreOptions {
-    logOnChange?: boolean;
+    logOnChange?: boolean; // property for debugging the store. will simply print the current values in the store
 }
 
 export class Store<T extends { [key: string]: any[] }> {
@@ -42,11 +42,11 @@ export class Store<T extends { [key: string]: any[] }> {
 
     /**
      * gets an observable for the specified store state value, if the state value is not found returns null
-     * @param statePropertyName name of the property to observe from the store state
+     * @param name name of the property to observe from the store state
      */
-    public observable<S>(statePropertyName: string): Observable<IStoreActionResult<S>> {
+    public observable<S>(name: string): Observable<IStoreActionResult<S>> {
         let pObs = this._observables.find((obs) => {
-            return obs.key === statePropertyName;
+            return obs.key === name;
         });
 
         if (pObs != null) {
@@ -102,7 +102,7 @@ export class Store<T extends { [key: string]: any[] }> {
     }
 
     /**
-     * gets the current value from the store if it exists, otherwise performs the specified action
+     * gets the current value from the store if it exists (not null and length > 1), otherwise performs the specified action
      * @param name name of the action to execute
      * @param args args to pass to the action
      */
@@ -128,10 +128,14 @@ export class Store<T extends { [key: string]: any[] }> {
         }
     }
 
-    public get<S extends any[]>(propertyName: string): S {
+    /**
+     * gets the current value of the given state property name from the store
+     * @param propertyName name of the value to retrieve from the store
+     */
+    public get<S extends any[]>(name: string): S {
         let found = null;
         this._observables.forEach((obs) => {
-            if (obs.key === propertyName) {
+            if (obs.key === name) {
                 found = clone(obs.value);
             }
         });
