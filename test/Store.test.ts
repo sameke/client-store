@@ -7,114 +7,114 @@ import { TestState } from './data/TestState';
 describe('Store', () => {
     it('should persist initial values', () => {
         let testState = new TestState();
-        testState.foo = 'hello';
-        testState.bar = {
+        testState.foo = ['hello'];
+        testState.bar = [{
             name: 'pugna'
-        };
+        }];
 
         let store: Store<TestState> = new Store(testState);
 
         let foo = store.get(nameof((s: TestState) => s.foo));
-        let bar: { name: string } = store.get(nameof((s: TestState) => s.bar));
+        let bar: [{ name: string }] = store.get(nameof((s: TestState) => s.bar));
 
-        expect(foo).to.equal(testState.foo);
-        expect(bar.name).to.equal(testState.bar.name);
+        expect(foo[0]).to.equal(testState.foo[0]);
+        expect(bar[0].name).to.equal(testState.bar[0].name);
     });
 
     it('should not return reference values', () => {
         let testState = new TestState();
-        testState.foo = 'hello';
-        testState.bar = {
+        testState.foo = ['hello'];
+        testState.bar = [{
             name: 'pugna'
-        };
+        }];
 
         let store: Store<TestState> = new Store(testState);
 
-        let bar: { name: string } = store.get(nameof((s: TestState) => s.bar));
+        let bar: [{ name: string }] = store.get(nameof((s: TestState) => s.bar));
 
         expect(bar).to.not.equal(testState.bar);
     });
 
     it('should pass state as first parameter to action', async () => {
         let testState = new TestState();
-        testState.foo = 'hello';
-        testState.bar = {
+        testState.foo = ['hello'];
+        testState.bar = [{
             name: 'pugna'
-        };
+        }];
 
         let store: Store<TestState> = new Store(testState);
 
-        let action: IStoreAction<TestState, { name: string }> = {
+        let action: IStoreAction<TestState, Array<{ name: string }>> = {
             name: 'updatebar',
             property: 'bar',
             action: (state: TestState, name: string) => {
                 if (state.bar == null) {
-                    state.bar = {
+                    state.bar = [{
                         name: name
-                    };
+                    }];
                 } else {
-                    state.bar.name = name;
+                    state.bar[0].name = name;
                 }
 
                 return Promise.resolve({
                     value: state.bar,
-                    action: StoreActionType.UPDATED,
-                    affectedItem: state.bar
-                } as IStoreActionResult<{ name: string }>);
+                    action: StoreActionType.UPDATE,
+                    affectedItem: state.bar[0]
+                } as IStoreActionResult<Array<{ name: string }>>);
             }
-        } as IStoreAction<TestState, { name: string }>;
+        } as IStoreAction<TestState, Array<{ name: string }>>;
 
         store.registerAction(action);
 
-        let result: IStoreActionResult<{ name: string }> = await store.executeAction(action.name, 'timber') as IStoreActionResult<{ name: string }>;
+        let result: IStoreActionResult<Array<{ name: string }>> = await store.executeAction(action.name, 'timber') as IStoreActionResult<Array<{ name: string }>>;
 
-        expect(result.value.name).to.equal('timber');
-        expect((store.get('bar') as any).name).to.equal('timber');
+        expect(result.value[0].name).to.equal('timber');
+        expect((store.get('bar') as any)[0].name).to.equal('timber');
     });
 
     it('should not execute action if store state has a value other than null', async () => {
         let testState = new TestState();
-        testState.foo = 'hello';
-        testState.bar = {
+        testState.foo = ['hello'];
+        testState.bar = [{
             name: 'pugna'
-        };
+        }];
 
         let store: Store<TestState> = new Store(testState);
 
-        let action: IStoreAction<TestState, { name: string }> = {
+        let action: IStoreAction<TestState, Array<{ name: string }>> = {
             name: 'updatebar',
             property: 'bar',
             action: (state: TestState, name: string) => {
                 if (state.bar == null) {
-                    state.bar = {
+                    state.bar = [{
                         name: name
-                    };
+                    }];
                 } else {
-                    state.bar.name = name;
+                    state.bar[0].name = name;
                 }
 
                 return Promise.resolve({
                     value: state.bar,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.bar
-                } as IStoreActionResult<{ name: string }>);
+                } as IStoreActionResult<Array<{ name: string }>>);
             }
-        } as IStoreAction<TestState, { name: string }>;
+        } as IStoreAction<TestState, Array<{ name: string }>>;
 
         store.registerAction(action);
 
-        let result: IStoreActionResult<{ name: string }> = await store.getOrExecuteAction(action.name, 'timber') as IStoreActionResult<{ name: string }>;
+        let result: IStoreActionResult<Array<{ name: string }>> = await store.getOrExecuteAction(action.name, 'timber') as IStoreActionResult<Array<{ name: string }>>;
 
-        expect(result.value.name).to.equal('pugna');
-        expect((store.get('bar') as any).name).to.equal('pugna');
+        expect(result.value[0].name).to.equal('pugna');
+        expect((store.get('bar') as any)[0].name).to.equal('pugna');
     });
 
     it('should not execute action if store state has a value which is an empty array', async () => {
         let testState = new TestState();
-        testState.foo = 'hello';
-        testState.bar = {
+        testState.foo = ['hello'];
+        testState.bar = [{
             name: 'pugna'
-        };
+        }];
         testState.a1 = ['pfm'];
 
         let store: Store<TestState> = new Store(testState);
@@ -127,7 +127,7 @@ describe('Store', () => {
 
                 return Promise.resolve({
                     value: state.a1,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.a1
                 } as IStoreActionResult<any[]>);
             }
@@ -143,10 +143,10 @@ describe('Store', () => {
 
     it('should execute action if store state has a value which is an empty array', async () => {
         let testState = new TestState();
-        testState.foo = 'hello';
-        testState.bar = {
+        testState.foo = ['hello'];
+        testState.bar = [{
             name: 'pugna'
-        };
+        }];
 
         let store: Store<TestState> = new Store(testState);
 
@@ -158,7 +158,7 @@ describe('Store', () => {
 
                 return Promise.resolve({
                     value: state.a1,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.a1
                 } as IStoreActionResult<any[]>);
             }

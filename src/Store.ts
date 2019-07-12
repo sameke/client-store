@@ -1,13 +1,7 @@
-import clone from 'clone';
+import { default as clone } from 'clone';
 import { Observable, Observer } from 'rxjs';
 
-export interface IStoreOptions {
-    logOnChange?: boolean; // property for debugging the store. will simply print the current values in the store
-}
-
 export class Store<T extends { [key: string]: any[] }> {
-
-    private _options: IStoreOptions;
     private _observables: Array<{
         key: string,
         observable: Observable<IStoreActionResult<any>>,
@@ -15,11 +9,9 @@ export class Store<T extends { [key: string]: any[] }> {
         value: any
     }> = [];
 
-    private _registeredActions: Array<IStoreAction<T, any>> = [];
+    private readonly _registeredActions: Array<IStoreAction<T, any>> = [];
 
-    public constructor(state: T, options?: IStoreOptions) {
-        this._options = options || {};
-
+    public constructor(state: T) {
         Object.keys(state).forEach((p: string) => {
             let observable = Observable.create((observer: Observer<IStoreActionResult<any>>) => {
                 let obs = this._observables.find((o) => {
@@ -63,6 +55,11 @@ export class Store<T extends { [key: string]: any[] }> {
     public registerAction<U>(action: IStoreAction<T, U>) {
         if (this._registeredActions.find((e) => e.name === action.name) == null) {
             this._registeredActions.push(action);
+            if ((Store.prototype as any).hasOwnProperty(action.name) === false) {
+                (Store.prototype as any)[action.name] = (...args: any[]) => {
+                    this.executeAction(action.name, ...args);
+                };
+            }
         }
     }
 
@@ -71,7 +68,7 @@ export class Store<T extends { [key: string]: any[] }> {
      * @param name name of the action to execute
      * @param args any number of arguments to pass to the specified action
      */
-    public async executeAction<S>(name: string, ...args: any[]): Promise<IStoreActionResult<S>> {
+    public async executeAction<S extends any[]>(name: string, ...args: any[]): Promise<IStoreActionResult<S>> {
         let ra = this._registeredActions.find((a) => {
             return a.name === name;
         });
@@ -89,9 +86,6 @@ export class Store<T extends { [key: string]: any[] }> {
                 if (cloned.action !== StoreActionType.NONE) {
                     pObs.value = clone(result.value);
                     this.notifyObservers(pObs.observers, cloned);
-                    if (this._options.logOnChange === true) {
-                        this.logContents();
-                    }
                 }
 
                 return cloned;
@@ -156,13 +150,6 @@ export class Store<T extends { [key: string]: any[] }> {
         observers.forEach((o) => {
             o.next(value);
         });
-    }
-
-    private logContents() {
-        for (let observable of this._observables) {
-            console.log(observable.key);
-            console.log(observable.value);
-        }
     }
 }
 
