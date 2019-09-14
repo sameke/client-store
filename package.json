@@ -5,7 +5,9 @@
   "main": "dist/commonjs/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "test": "mocha \"test/**/*.test.ts\" --require ts-node/register -r amd-loader"
+    "test": "mocha \"test/**/*.test.ts\" --require ts-node/register -r amd-loader",
+    "build": "tsc",
+    "install": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -15,7 +17,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.1.7",
-    "@types/clone": "^0.1.30",
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.12.1",
     "amd-loader": "0.0.8",
@@ -42,6 +43,7 @@
     "yargs": "^11.0.0"
   },
   "dependencies": {
+    "@types/clone": "^0.1.30",
     "clone": "^2.1.2",
     "rxjs": "^6.5.2"
   }

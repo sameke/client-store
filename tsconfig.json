@@ -7,11 +7,8 @@
         "declaration": true,
         "target": "es2017",
         "noImplicitAny": true,
-        "paths": {
-            "clone-deep": [
-                "types/declarations.d.ts"
-            ]
-        }
+        "module": "commonjs",
+        "outDir": "dist"
     },
     "include": [
         "src/**/*.ts"

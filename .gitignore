@@ -2,3 +2,4 @@ node_modules
 docs
 jspm_packages
 package-lock.json
+dist
