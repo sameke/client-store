@@ -1,12 +1,13 @@
 import clone from 'clone';
 import { Observable, Observer } from 'rxjs';
+import { Mutex } from './Mutex';
 
 export interface IStoreOptions {
     logOnChange?: boolean;
 }
 
 export class Store<T extends { [key: string]: any[] }> {
-
+    private _locks: { [key: string]: Mutex };
     private _options: IStoreOptions;
     private _observables: Array<{
         key: string,

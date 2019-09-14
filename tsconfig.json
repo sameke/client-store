@@ -5,13 +5,10 @@
         "sourceMap": true,
         "baseUrl": ".",
         "declaration": true,
-        "target": "es2017",
         "noImplicitAny": true,
-        "paths": {
-            "clone-deep": [
-                "types/declarations.d.ts"
-            ]
-        }
+        "module": "commonjs",
+        "outDir": "dist",
+        "target": "es2017"
     },
     "include": [
         "src/**/*.ts"
