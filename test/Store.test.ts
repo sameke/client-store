@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { stat } from 'fs';
 import { nameof } from 'ts-simple-nameof';
 import { IStoreAction, IStoreActionResult, Store, StoreActionType } from '../src/Store';
 import { TestState } from './data/TestState';
@@ -15,7 +14,7 @@ describe('Store', () => {
         let store: Store<TestState> = new Store(testState);
 
         let foo = store.get(nameof((s: TestState) => s.foo));
-        let bar: { name: string } = store.get(nameof((s: TestState) => s.bar));
+        let bar: { name: string } = store.get<{ name: string }>(nameof((s: TestState) => s.bar));
 
         expect(foo).to.equal(testState.foo);
         expect(bar.name).to.equal(testState.bar.name);
@@ -58,7 +57,7 @@ describe('Store', () => {
 
                 return Promise.resolve({
                     value: state.bar,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.bar
                 } as IStoreActionResult<{ name: string }>);
             }
@@ -95,7 +94,7 @@ describe('Store', () => {
 
                 return Promise.resolve({
                     value: state.bar,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.bar
                 } as IStoreActionResult<{ name: string }>);
             }
@@ -127,7 +126,7 @@ describe('Store', () => {
 
                 return Promise.resolve({
                     value: state.a1,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.a1
                 } as IStoreActionResult<any[]>);
             }
@@ -158,7 +157,7 @@ describe('Store', () => {
 
                 return Promise.resolve({
                     value: state.a1,
-                    action: StoreActionType.UPDATED,
+                    action: StoreActionType.UPDATE,
                     affectedItem: state.a1
                 } as IStoreActionResult<any[]>);
             }

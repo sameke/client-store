@@ -1,22 +1,23 @@
 import clone from 'clone';
 import { Observable, Observer } from 'rxjs';
-import { Mutex } from './Mutex';
+import { Lock } from './Lock';
 
 export interface IStoreOptions {
     logOnChange?: boolean;
 }
 
-export class Store<T extends { [key: string]: any[] }> {
-    private _locks: { [key: string]: Mutex };
-    private _options: IStoreOptions;
-    private _observables: Array<{
+export class Store<T extends { [key: string]: any }> {
+    private readonly _locks: {
+        [key: string]: Lock
+    } = {};
+    private readonly _observables: Array<{
         key: string,
         observable: Observable<IStoreActionResult<any>>,
         observers: Array<Observer<IStoreActionResult<any>>>,
         value: any
     }> = [];
-
-    private _registeredActions: Array<IStoreAction<T, any>> = [];
+    private readonly _registeredActions: Array<IStoreAction<T, any>> = [];
+    private _options: IStoreOptions;
 
     public constructor(state: T, options?: IStoreOptions) {
         this._options = options || {};
@@ -90,9 +91,6 @@ export class Store<T extends { [key: string]: any[] }> {
                 if (cloned.action !== StoreActionType.NONE) {
                     pObs.value = clone(result.value);
                     this.notifyObservers(pObs.observers, cloned);
-                    if (this._options.logOnChange === true) {
-                        this.logContents();
-                    }
                 }
 
                 return cloned;
@@ -107,16 +105,35 @@ export class Store<T extends { [key: string]: any[] }> {
      * @param name name of the action to execute
      * @param args args to pass to the action
      */
-    public async getOrExecuteAction<S extends any[]>(name: string, ...args: any[]): Promise<IStoreActionResult<S>> {
+    public async getOrExecuteAction<S>(name: string, ...args: any[]): Promise<IStoreActionResult<S>> {
         let ra = this._registeredActions.find((a) => {
             return a.name === name;
         });
+
         if (ra != null) {
             let property = ra.property;
 
             let result = this.get<S>(property);
             if (result == null || (result instanceof Array && result.length === 0)) {
-                return this.executeAction<S>(name, ...args);
+                let lock = this._locks[name];
+                if (lock == null) {
+                    lock = new Lock();
+                    this._locks[name] = lock;
+                }
+
+                if (lock.isLocked === false) {
+                    let release = lock.lock();
+                    return this.executeAction<S>(name, ...args).then((res) => {
+                        release();
+                        return res;
+                    });
+                } else {
+                    return new Promise((resolve, reject) => {
+                        lock.on('release', () => {
+                            resolve(this.getOrExecuteAction<S>(name, ...args));
+                        });
+                    }) as Promise<IStoreActionResult<S>>;
+                }
             } else {
                 return {
                     value: result,
@@ -124,12 +141,11 @@ export class Store<T extends { [key: string]: any[] }> {
                 } as IStoreActionResult<S>;
             }
         } else {
-
             throw new Error(`${name} not registered`);
         }
     }
 
-    public get<S extends any[]>(propertyName: string): S {
+    public get<S extends any>(propertyName: string): S {
         let found = null;
         this._observables.forEach((obs) => {
             if (obs.key === propertyName) {
@@ -153,13 +169,6 @@ export class Store<T extends { [key: string]: any[] }> {
         observers.forEach((o) => {
             o.next(value);
         });
-    }
-
-    private logContents() {
-        for (let observable of this._observables) {
-            console.log(observable.key);
-            console.log(observable.value);
-        }
     }
 }
 
