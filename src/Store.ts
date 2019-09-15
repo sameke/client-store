@@ -21,7 +21,6 @@ export class Store<T extends { [key: string]: any }> {
 
     public constructor(state: T, options?: IStoreOptions) {
         this._options = options || {};
-
         Object.keys(state).forEach((p: string) => {
             let observable = Observable.create((observer: Observer<IStoreActionResult<any>>) => {
                 let obs = this._observables.find((o) => {
@@ -44,11 +43,11 @@ export class Store<T extends { [key: string]: any }> {
 
     /**
      * gets an observable for the specified store state value, if the state value is not found returns null
-     * @param statePropertyName name of the property to observe from the store state
+     * @param name name of the property to observe from the store state
      */
-    public observable<S>(statePropertyName: string): Observable<IStoreActionResult<S>> {
+    public observable<S>(name: string): Observable<IStoreActionResult<S>> {
         let pObs = this._observables.find((obs) => {
-            return obs.key === statePropertyName;
+            return obs.key === name;
         });
 
         if (pObs != null) {
@@ -65,6 +64,11 @@ export class Store<T extends { [key: string]: any }> {
     public registerAction<U>(action: IStoreAction<T, U>) {
         if (this._registeredActions.find((e) => e.name === action.name) == null) {
             this._registeredActions.push(action);
+            if ((Store.prototype as any).hasOwnProperty(action.name) === false) {
+                (Store.prototype as any)[action.name] = (...args: any[]) => {
+                    this.executeAction(action.name, ...args);
+                };
+            }
         }
     }
 
@@ -101,7 +105,7 @@ export class Store<T extends { [key: string]: any }> {
     }
 
     /**
-     * gets the current value from the store if it exists, otherwise performs the specified action
+     * gets the current value from the store if it exists (not null and length > 1), otherwise performs the specified action
      * @param name name of the action to execute
      * @param args args to pass to the action
      */
@@ -145,10 +149,10 @@ export class Store<T extends { [key: string]: any }> {
         }
     }
 
-    public get<S extends any>(propertyName: string): S {
+    public get<S extends any>(name: string): S {
         let found = null;
         this._observables.forEach((obs) => {
-            if (obs.key === propertyName) {
+            if (obs.key === name) {
                 found = clone(obs.value);
             }
         });

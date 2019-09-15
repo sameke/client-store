@@ -128,13 +128,13 @@ describe('Store', () => {
                     value: state.a1,
                     action: StoreActionType.UPDATE,
                     affectedItem: state.a1
-                } as IStoreActionResult<any[]>);
+                } as IStoreActionResult<any>);
             }
-        } as IStoreAction<TestState, any[]>;
+        } as IStoreAction<TestState, any>;
 
         store.registerAction(action);
 
-        let result: IStoreActionResult<any[]> = await store.getOrExecuteAction(action.name, ['foo']) as IStoreActionResult<any[]>;
+        let result: IStoreActionResult<any> = await store.getOrExecuteAction(action.name, ['foo']) as IStoreActionResult<any>;
 
         expect(result.value[0]).to.equal('pfm');
         expect((store.get('a1') as any)[0]).to.equal('pfm');
@@ -149,26 +149,26 @@ describe('Store', () => {
 
         let store: Store<TestState> = new Store(testState);
 
-        let action: IStoreAction<TestState, any[]> = {
+        let action: IStoreAction<TestState, any> = {
             name: 'updatea1',
             property: 'a1',
-            action: (state: TestState, a1: any[]) => {
+            action: (state: TestState, a1: any) => {
                 state.a1 = a1;
 
                 return Promise.resolve({
                     value: state.a1,
                     action: StoreActionType.UPDATE,
                     affectedItem: state.a1
-                } as IStoreActionResult<any[]>);
+                } as IStoreActionResult<any>);
             }
-        } as IStoreAction<TestState, any[]>;
+        } as IStoreAction<TestState, any>;
 
         store.registerAction(action);
 
-        let result: IStoreActionResult<any[]> = await store.getOrExecuteAction(action.name, ['pfm']) as IStoreActionResult<any[]>;
+        let result: IStoreActionResult<any> = await store.getOrExecuteAction(action.name, ['pfm']) as IStoreActionResult<any>;
 
         expect(result.value[0]).to.equal('pfm');
-        let a1a: any[] = store.get('a1');
+        let a1a: any = store.get('a1');
         expect(a1a[0]).to.equal('pfm');
     });
 });

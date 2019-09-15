@@ -1,1 +1,1 @@
-export { Store, StoreActionType, IStoreAction, IStoreActionResult, IStoreOptions } from './Store';
+export { Store, StoreActionType, IStoreAction, IStoreActionResult } from './Store';
