@@ -29,7 +29,7 @@ describe('Store', () => {
 
         let store: Store<TestState> = new Store(testState);
 
-        let bar: { name: string } = store.get(nameof((s: TestState) => s.bar));
+        let bar: [{ name: string }] = store.get(nameof((s: TestState) => s.bar));
 
         expect(bar).to.not.equal(testState.bar);
     });
@@ -118,10 +118,10 @@ describe('Store', () => {
 
         let store: Store<TestState> = new Store(testState);
 
-        let action: IStoreAction<TestState, any[]> = {
+        let action: IStoreAction<TestState, any> = {
             name: 'updatea1',
             property: 'a1',
-            action: (state: TestState, a1: any[]) => {
+            action: (state: TestState, a1: any) => {
                 state.a1 = a1;
 
                 return Promise.resolve({
